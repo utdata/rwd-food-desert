@@ -34,10 +34,9 @@ The creates an env called **data**. You only have to do this once on your comput
 - Create two folders inside called **data-raw** and **data-processed**. This is so we won't overwrite the original data. Just good practice.
 - Put your downloaded Excel file into the **data-raw** folder.
 
-There is some benefit to doing the rest of this from inside VS Code with its integrated Terminal. That way you can see the files created and inspect them.
+The rest of this is done from inside a Terminal. (There is some benefit in using VS Code and it's integrated Terminal so you can see the files created and inspect them.
 
-- Open the project folder.
-- Use `cd` to go inside the **data-processed** folder
+- In your Terminal, `cd` into you project folder, then to inside the **data-processed** folder.
 - Do `conda activate data` to launch the python env.
 
 ## Using csvkit to convert, filter, select
