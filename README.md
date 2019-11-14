@@ -1,6 +1,13 @@
 # Food desert data
 
-Some work to help some students on a project.
+Some work to help some students on a project. We are using a python-based package called [csvkit](https://csvkit.readthedocs.io/en/latest/) to manage a large Excel file without having Excel.
+
+## Resources
+
+- [csvkit documentation](https://csvkit.readthedocs.io/en/latest/).
+- Another [tutorial on using using csvkit](https://github.com/utdata/csvkit-nicar2018).
+
+## Getting the data
 
 Data file _Food Access Research Atlas Data Download 2015_ downloaded from [United States Department of Agriculture](https://www.ers.usda.gov/data-products/food-access-research-atlas/download-the-data/). Filename is `DataDownload2015.xlsx` in data-raw. This has three tabs. I saved the tab **Variables Lookup** as it's own file `data-dictionary.xlsx` for reference in a smaller file.
 
@@ -10,7 +17,7 @@ Most of this that follows is done in a Terminal.
 
 ## Install Miniconda if you don't have it
 
-- [Go here](https://docs.conda.io/en/latest/miniconda.html) to download the Python 3.7. The **pkg** version is probably easiest ... just double-click on it to install.
+- [Go here](https://docs.conda.io/en/latest/miniconda.html) to download the Python 3.7 version of Miniconda. The **pkg** version is probably easiest ... just double-click on it to install.
 - If using the **bash** version: [installation instructions](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html).
 
 ## Create a conda environment
@@ -19,17 +26,18 @@ Most of this that follows is done in a Terminal.
 
 `conda create -n data csvkit`
 
-The creates an env called **data**.
+The creates an env called **data**. You only have to do this once on your computer. (After that, you just use `conda activate data` to load the env.)
 
 ## Preparing the project
 
-- Create a folder for the project
+- Create a folder for the project.
 - Create two folders inside called **data-raw** and **data-processed**. This is so we won't overwrite the original data. Just good practice.
+- Put your downloaded Excel file into the **data-raw** folder.
 
-This is some benefit to doing the rest of this from inside VS Code with it's integrated Terminal. That way you can see the files created and inspect them.
+There is some benefit to doing the rest of this from inside VS Code with its integrated Terminal. That way you can see the files created and inspect them.
 
 - Open the project folder.
-- use `cd` to go inside the **data-processed** folder
+- Use `cd` to go inside the **data-processed** folder
 - Do `conda activate data` to launch the python env.
 
 ## Using csvkit to convert, filter, select
@@ -50,9 +58,9 @@ Food Access Research Atlas
 
 `in2csv ../data-raw/DataDownload2015.xlsx --sheet "Food Access Research Atlas" -y 200 > food_access.csv`
 
-- We should also convert the record layout too:
+- We should also convert the record layout for reference purposes:
 
-`in2csv ../data-raw/DataDownload2015.xlsx --sheet "Variable Lookup" -y 200 > record_layout.csv`
+`in2csv ../data-raw/DataDownload2015.xlsx --sheet "Variable Lookup" > record_layout.csv`
 
 - Next is to get a list of columns names in the **food_access.csv** file so we know what we are looking at:
 
@@ -221,4 +229,4 @@ csvcut -n food_access.csv
 
 We might change those numbers later if we find we want different columns. Note there are no spaces between those commas and numbers.
 
-This creates the final "travis_select.csv" file you can use in Workbench or Tableau.
+This creates the final "travis_select.csv" file you can use in Workbench or Tableau. FWIW, you might do the pivots in Workbench using [pandas melt](https://github.com/utdata/rwd-workbench/blob/master/reshape-melt.md).
