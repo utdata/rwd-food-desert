@@ -14,11 +14,7 @@ library(readxl)
 
 ## Import the data
 
-There are a number of files in `data-processed` that are exports from [Astrid's Workbench](https://app.workbenchdata.com/workflows/39111/).
-
-Though now I'm starting from the original downloaded data in `data-raw`.
-
-- One thought is I can use the xx function i read_excel to pull in only the column we need during import. The values I used with csvcut were: `1-6,10-13,15-24`
+I'm starting from the original downloaded data in `data-raw`.
 
 ```{r}
 fa_raw <- read_excel("data-raw/DataDownload2015.xlsx", sheet = "Food Access Research Atlas")

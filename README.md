@@ -1,6 +1,11 @@
 # Food desert data
 
-This is a project to join
+This is a project to prepare Food Access data to join with spatial files to put in Tableau. We're basically trying to make a version of this map, you can [build here](https://www.ers.usda.gov/data-products/food-access-research-atlas/go-to-the-atlas/).
+
+![food-atlas](img/food-atlas-map.png)
+
+Unfortunatly, in the end Tableau isn't as cool as the atlas above (which I think is ArcGIS online.)
+
 
 ## Getting the data
 

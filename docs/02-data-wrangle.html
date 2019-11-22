@@ -1704,8 +1704,8 @@ fa_travis_lila &lt;- fa_travis_lila %&gt;%
   mutate(Limited_Income_Limited_Access = 
             case_when(
               (LILATracts_halfAnd10 == 0 &amp; LILATracts_1And10 == 0) ~ &quot;Good access&quot;,
-              (LILATracts_halfAnd10 == 1 &amp; LILATracts_1And10 == 0) ~ &quot;Between half and one mile&quot;,
-              (LILATracts_halfAnd10 == 1 &amp; LILATracts_1And10 == 1) ~ &quot;More than one mile&quot;
+              (LILATracts_halfAnd10 == 1 &amp; LILATracts_1And10 == 0) ~ &quot;Between 1/2 and 1 mile&quot;,
+              (LILATracts_halfAnd10 == 1 &amp; LILATracts_1And10 == 1) ~ &quot;More than 1 mile&quot;
             )
         )
 
@@ -1718,7 +1718,7 @@ fa_travis_lila %&gt;%
   ) %&gt;% head(10)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["CensusTract"],"name":[1],"type":["chr"],"align":["left"]},{"label":["LILATracts_halfAnd10"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["LILATracts_1And10"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Limited_Income_Limited_Access"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"48453000101","2":"0","3":"0","4":"Good access"},{"1":"48453000102","2":"0","3":"0","4":"Good access"},{"1":"48453000203","2":"1","3":"0","4":"Between half and one mile"},{"1":"48453000204","2":"1","3":"0","4":"Between half and one mile"},{"1":"48453000205","2":"0","3":"0","4":"Good access"},{"1":"48453000206","2":"0","3":"0","4":"Good access"},{"1":"48453000302","2":"1","3":"0","4":"Between half and one mile"},{"1":"48453000304","2":"1","3":"0","4":"Between half and one mile"},{"1":"48453000305","2":"1","3":"1","4":"More than one mile"},{"1":"48453000306","2":"0","3":"0","4":"Good access"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["CensusTract"],"name":[1],"type":["chr"],"align":["left"]},{"label":["LILATracts_halfAnd10"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["LILATracts_1And10"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Limited_Income_Limited_Access"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"48453000101","2":"0","3":"0","4":"Good access"},{"1":"48453000102","2":"0","3":"0","4":"Good access"},{"1":"48453000203","2":"1","3":"0","4":"Between 1/2 and 1 mile"},{"1":"48453000204","2":"1","3":"0","4":"Between 1/2 and 1 mile"},{"1":"48453000205","2":"0","3":"0","4":"Good access"},{"1":"48453000206","2":"0","3":"0","4":"Good access"},{"1":"48453000302","2":"1","3":"0","4":"Between 1/2 and 1 mile"},{"1":"48453000304","2":"1","3":"0","4":"Between 1/2 and 1 mile"},{"1":"48453000305","2":"1","3":"1","4":"More than 1 mile"},{"1":"48453000306","2":"0","3":"0","4":"Good access"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -1751,17 +1751,69 @@ fa_travis_la %&gt;%
 <p>We’ll create a new dataframe that starts with LILA and adds the <code>Limited Access</code> column from the LA dataframe.</p>
 <pre class="r"><code># Drop unneeded columns from la
 fa_travis_la &lt;- fa_travis_la %&gt;% 
-  select(CensusTract, LATracts_half, LATracts1)
+  select(CensusTract, LATracts_half, LATracts1, Limited_Access)
 
 # join the dataframes
-travis_food_access &lt;- left_join(fa_travis_lila, fa_travis_la, by=&quot;CensusTract&quot;)</code></pre>
+travis_food_access &lt;- left_join(fa_travis_lila, fa_travis_la, by=&quot;CensusTract&quot;)
+
+# peek at names to check join
+travis_food_access %&gt;% names()</code></pre>
+<pre><code>##  [1] &quot;CensusTract&quot;                   &quot;State&quot;                        
+##  [3] &quot;County&quot;                        &quot;Urban&quot;                        
+##  [5] &quot;POP2010&quot;                       &quot;OHU2010&quot;                      
+##  [7] &quot;LowIncomeTracts&quot;               &quot;PovertyRate&quot;                  
+##  [9] &quot;MedianFamilyIncome&quot;            &quot;LILATracts_halfAnd10&quot;         
+## [11] &quot;LILATracts_1And10&quot;             &quot;Limited_Income_Limited_Access&quot;
+## [13] &quot;LATracts_half&quot;                 &quot;LATracts1&quot;                    
+## [15] &quot;Limited_Access&quot;</code></pre>
 </div>
 <div id="export-for-qgis" class="section level2">
 <h2>Export for QGIS</h2>
+</div>
+<div id="remove-columns" class="section level2">
+<h2>Remove columns</h2>
+<p>We’ll remove some columns we won’t need in the final dataset.</p>
+<pre class="r"><code># peeking at names
+tfa &lt;- travis_food_access %&gt;% 
+  select(
+    CensusTract,
+    Urban,
+    LowIncomeTracts,
+    POP2010,
+    PovertyRate,
+    MedianFamilyIncome,
+    Limited_Access,
+    Limited_Income_Limited_Access
+    )
+
+# peek at names
+tfa %&gt;% names()</code></pre>
+<pre><code>## [1] &quot;CensusTract&quot;                   &quot;Urban&quot;                        
+## [3] &quot;LowIncomeTracts&quot;               &quot;POP2010&quot;                      
+## [5] &quot;PovertyRate&quot;                   &quot;MedianFamilyIncome&quot;           
+## [7] &quot;Limited_Access&quot;                &quot;Limited_Income_Limited_Access&quot;</code></pre>
+</div>
+<div id="fix-boolean-values" class="section level2">
+<h2>Fix boolean values</h2>
+<p>There are some true/false vales represented as 1 and 0. Let’s change them.</p>
+<pre class="r"><code># run thss only once
+tfa &lt;- tfa %&gt;% 
+  mutate(
+    Urban = 
+      case_when(
+        Urban == 0 ~ &quot;No&quot;,
+        Urban == 1 ~ &quot;Yes&quot;
+      ),
+    LowIncomeTracts =
+      case_when(
+        LowIncomeTracts == 0 ~ &quot;No&quot;,
+        LowIncomeTracts == 1 ~ &quot;Yes&quot;
+      )
+  )</code></pre>
 <p>My easy out is to export this as csv and then join in QGIS.</p>
 <p>I’ll also export as .rds to try to build maps in R later.</p>
-<pre class="r"><code>travis_food_access %&gt;% write_rds(&quot;data-processed/travis_food_access.rds&quot;)
-travis_food_access %&gt;% write_csv(&quot;data-processed/travis_food_access.csv&quot;)</code></pre>
+<pre class="r"><code>tfa %&gt;% write_rds(&quot;data-processed/tfa.rds&quot;)
+tfa %&gt;% write_csv(&quot;data-processed/tfa.csv&quot;)</code></pre>
 </div>
 
 

@@ -131,8 +131,8 @@ fa_travis_lila <- fa_travis_lila %>%
   mutate(Limited_Income_Limited_Access = 
             case_when(
               (LILATracts_halfAnd10 == 0 & LILATracts_1And10 == 0) ~ "Good access",
-              (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 0) ~ "Between half and one mile",
-              (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 1) ~ "More than one mile"
+              (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 0) ~ "Between 1/2 and 1 mile",
+              (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 1) ~ "More than 1 mile"
             )
         )
 
@@ -145,6 +145,7 @@ fa_travis_lila %>%
   ) %>% head(10)
 
 ```
+
 
 ## Create column for LA food access for tracts
 
@@ -175,21 +176,70 @@ We'll create a new dataframe that starts with LILA and adds the `Limited Access`
 ```{r}
 # Drop unneeded columns from la
 fa_travis_la <- fa_travis_la %>% 
-  select(CensusTract, LATracts_half, LATracts1)
+  select(CensusTract, LATracts_half, LATracts1, Limited_Access)
 
 # join the dataframes
 travis_food_access <- left_join(fa_travis_lila, fa_travis_la, by="CensusTract")
 
+# peek at names to check join
+travis_food_access %>% names()
+
 ```
 
 ## Export for QGIS
+
+## Remove columns
+
+We'll remove some columns we won't need in the final dataset.
+
+```{r}
+# peeking at names
+tfa <- travis_food_access %>% 
+  select(
+    CensusTract,
+    Urban,
+    LowIncomeTracts,
+    POP2010,
+    PovertyRate,
+    MedianFamilyIncome,
+    Limited_Access,
+    Limited_Income_Limited_Access
+    )
+
+# peek at names
+tfa %>% names()
+
+```
+
+## Fix boolean values
+
+There are some true/false vales represented as 1 and 0. Let's change them.
+
+```{r}
+# run thss only once
+tfa <- tfa %>% 
+  mutate(
+    Urban = 
+      case_when(
+        Urban == 0 ~ "No",
+        Urban == 1 ~ "Yes"
+      ),
+    LowIncomeTracts =
+      case_when(
+        LowIncomeTracts == 0 ~ "No",
+        LowIncomeTracts == 1 ~ "Yes"
+      )
+  )
+
+```
+
 
 My easy out is to export this as csv and then join in QGIS.
 
 I'll also export as .rds to try to build maps in R later.
 
 ```{r}
-travis_food_access %>% write_rds("data-processed/travis_food_access.rds")
-travis_food_access %>% write_csv("data-processed/travis_food_access.csv")
+tfa %>% write_rds("data-processed/tfa.rds")
+tfa %>% write_csv("data-processed/tfa.csv")
 ```
 

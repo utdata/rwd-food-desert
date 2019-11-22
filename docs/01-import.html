@@ -1586,11 +1586,7 @@ library(janitor)
 library(readxl)</code></pre>
 <div id="import-the-data" class="section level2">
 <h2>Import the data</h2>
-<p>There are a number of files in <code>data-processed</code> that are exports from <a href="https://app.workbenchdata.com/workflows/39111/">Astrid’s Workbench</a>.</p>
-<p>Though now I’m starting from the original downloaded data in <code>data-raw</code>.</p>
-<ul>
-<li>One thought is I can use the xx function i read_excel to pull in only the column we need during import. The values I used with csvcut were: <code>1-6,10-13,15-24</code></li>
-</ul>
+<p>I’m starting from the original downloaded data in <code>data-raw</code>.</p>
 <pre class="r"><code>fa_raw &lt;- read_excel(&quot;data-raw/DataDownload2015.xlsx&quot;, sheet = &quot;Food Access Research Atlas&quot;)</code></pre>
 <p>Look at names so we can select them:</p>
 <pre class="r"><code>fa_raw %&gt;% names</code></pre>
