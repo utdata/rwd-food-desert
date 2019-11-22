@@ -8,11 +8,11 @@ Data file _Food Access Research Atlas Data Download 2015_ downloaded from [Unite
 
 ## 01-import
 
-[01-import.rmd]() imports the file from Excel, selects the columns we need and filters it to Travis County, Texas. There are 2018 rows.
+[01-import](https://utdata.github.io/rwd-food-desert/01-import.html) imports the file from Excel, selects the columns we need and filters it to Travis County, Texas. There are 2018 rows.
 
 ## 02-data-wrangle
 
-[02-data-wrangle]() does some data checking and creates columns that can more easily show the food access level of each census tract.
+[02-data-wrangle](https://utdata.github.io/rwd-food-desert/02-data-wrangle.html) does some data checking and creates columns that can more easily show the food access level of each census tract.
 
 Exports from this notebook will be used to join datain QGIS.
 
