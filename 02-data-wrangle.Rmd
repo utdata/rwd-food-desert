@@ -55,7 +55,7 @@ We can simplify the data if there are no tracts with food deserts further than 1
 
 ### LA check on grocery range
 
-This shows there are no tracts with grocery store further away than 10 miles. This means we only really need LATracts_half, LATracts1 later since all others are good.
+This shows there are no tracts with grocery store further away than 10 miles. This means we only really need LATracts_half, LATracts1 since no tracts have anything further.
 
 ```{r}
 fa_travis_la %>%
@@ -89,11 +89,11 @@ fa_travis_lila_rural %>%
   tabyl(Urban, LILATracts_1And20)
 ```
 
-There are 22 rural tracts, but none are food deserts at 10 or 20 miles, so we can exclude them.
+There are 22 rural tracts, but none are food deserts at 10+ or 20+ miles, so we can exclude them.
 
-## Build LILA Food Access column
+## Build Food Access columns
 
-### Reorder for clarity
+### Reorder LILA columns for clarity
 
 In help to understand these food desert columns, I'm putting them in order in the dataframe:
 
@@ -119,11 +119,11 @@ fa_travis_lila <- fa_travis_lila %>%
 
 ### Create column to show LILA food access for tracts
 
-How to rate the tracts:
+How to rate the tracts. Remember we already checked the 10+, 20+ for rural tracts.
 
 - 00 -- Not a LILA food desert.
 - 10 -- Supermarket w/in 1 mile, but not 1/2 mile.
-- 11 -- Supermarket not within a mile.
+- 11 -- Supermarket not within 1 mile.
 
 
 ```{r}
@@ -147,7 +147,7 @@ fa_travis_lila %>%
 ```
 
 
-## Create column for LA food access for tracts
+### Create column for LA food access for tracts
 
 We are picking up the fa_travis_la dataframe from above and creating a similar Food Access column
 
@@ -156,8 +156,8 @@ fa_travis_la <- fa_travis_la %>%
   mutate(Limited_Access = 
             case_when(
               (LATracts_half == 0 & LATracts1 == 0) ~ "Good access",
-              (LATracts_half == 1 & LATracts1 == 0) ~ "Between half and one mile",
-              (LATracts_half == 1 & LATracts1 == 1) ~ "More than one mile"
+              (LATracts_half == 1 & LATracts1 == 0) ~ "Between 1/2 and 1 mile",
+              (LATracts_half == 1 & LATracts1 == 1) ~ "More than 1 mile"
             )
         )
 
@@ -179,22 +179,21 @@ fa_travis_la <- fa_travis_la %>%
   select(CensusTract, LATracts_half, LATracts1, Limited_Access)
 
 # join the dataframes
-travis_food_access <- left_join(fa_travis_lila, fa_travis_la, by="CensusTract")
+tfa <- left_join(fa_travis_lila, fa_travis_la, by="CensusTract")
 
 # peek at names to check join
-travis_food_access %>% names()
+tfa %>% names()
 
 ```
 
 ## Export for QGIS
 
-## Remove columns
+### Remove columns
 
-We'll remove some columns we won't need in the final dataset.
+We'll select only the columns we need in the final dataset.
 
 ```{r}
-# peeking at names
-tfa <- travis_food_access %>% 
+tfa <- tfa %>% 
   select(
     CensusTract,
     Urban,
@@ -211,7 +210,7 @@ tfa %>% names()
 
 ```
 
-## Fix boolean values
+### Fix boolean values
 
 There are some true/false vales represented as 1 and 0. Let's change them.
 
@@ -233,6 +232,8 @@ tfa <- tfa %>%
 
 ```
 
+
+### Do the exports
 
 My easy out is to export this as csv and then join in QGIS.
 
