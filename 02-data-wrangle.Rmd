@@ -1,0 +1,195 @@
+---
+title: "Data wrangling"
+output:
+  html_document:
+    df_print: paged
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
+---
+
+## The plan
+
+- We are starting with Travis County data, which was created in [01-import.rmd](01-import.Rmd).
+- We work on the LILA (Low Income, Low Access) columns first, so we drop the LA columns.
+- We create a LA dataset to work on later.
+- Reorder the columns to put LILA at the end, in order. This is just for clarity.
+- Create a new `Limited_Income_Limited_Access` column based on our logic noted below.
+- We do a similar function for the LA dataset to get `Limited_Access`.
+- We create our final dataset by joining the new `Limited_Access` column to the LILA dataset.
+- Once this is all done, we could export to join with the shapefile in QGIS
+- Some day I'll try to do the maps in R.
+
+## Libraries
+
+```{r setup, echo=T, results='hide', message=F, warning=F}
+library(tidyverse)
+library(janitor)
+```
+
+
+## Import the data
+
+This was filtered previously.
+
+```{r}
+fa_travis <- read_rds("data-processed/fa_travis.rds")
+```
+
+## Build LILA and LA sets
+
+- We work with Low Income, Low Access first, and include all other relevant columns. We do this by dropping the LA columns.
+- We build a Low Access fram with just the LA columns and the Census Tract to join with later.
+
+```{r}
+# Creates LILA df by dropping the LA "Low Access" columns
+fa_travis_lila <- fa_travis %>% 
+  select(-starts_with("LA"))
+
+# Create a LA set for later
+fa_travis_la <- fa_travis %>% 
+  select(CensusTract, Urban, LATracts_half, LATracts1, LATracts10, LATracts20)
+```
+
+## Check outer grocery ranges
+
+We can simplify the data if there are no tracts with food deserts further than 10-miles range.
+
+### LA check on grocery range
+
+This shows there are no tracts with grocery store further away than 10 miles. This means we only really need LATracts_half, LATracts1 later since all others are good.
+
+```{r}
+fa_travis_la %>%
+  filter(LATracts10 == 1)
+```
+
+### Do we have rural coutines in LILA?
+
+Since there is a more complicated rural component to the LILA variables, we will check if any of our rural counties have food deserts outside the 10-mile range.
+
+Are there non-Urban counties?
+
+```{r}
+fa_travis_lila %>% 
+  tabyl(Urban)
+```
+
+Yes ... 22 of them.
+ 
+### Are any rural counties LILA food deserts?
+
+```{r}
+# filter for rural counties
+fa_travis_lila_rural <- fa_travis_lila %>% 
+  filter(Urban == 0)
+
+fa_travis_lila_rural %>% 
+  tabyl(Urban, LILATracts_1And10)
+
+fa_travis_lila_rural %>% 
+  tabyl(Urban, LILATracts_1And20)
+```
+
+There are 22 rural tracts, but none are food deserts at 10 or 20 miles, so we can exclude them.
+
+## Build LILA Food Access column
+
+### Reorder for clarity
+
+In help to understand these food desert columns, I'm putting them in order in the dataframe:
+
+- LILATracts_halfAnd10: Means food access is between 1/2 mile and 1 mile away in urban areas.
+- LILATracts_1And10: Means food access is further than 1 mile away in urban area.
+- LILATracts_1And20: Means food access is further than 1 mile away in urban area, and futher than 20 miles in rural areas. We've found above we don't have any in Travis county, so we are dropping it.
+- LILATracts_Vehicle: Is a confusing metric outside our story. We will drop it.
+
+```{r}
+# reorders columns with LILA at end in order
+# this seems overly complicated, but it worked
+fa_travis_lila <- fa_travis_lila %>%
+  select(-LILATracts_halfAnd10, everything()) %>%
+  select(-LILATracts_1And10, everything()) %>%
+  select(-LILATracts_1And20, everything()) %>%
+  select(-LILATracts_Vehicle, everything())
+
+# dropping 20-mile rural and Vehicle field
+fa_travis_lila <- fa_travis_lila %>% 
+  select(-LILATracts_1And20, -LILATracts_Vehicle)
+
+```
+
+### Create column to show LILA food access for tracts
+
+How to rate the tracts:
+
+- 00 -- Not a LILA food desert.
+- 10 -- Supermarket w/in 1 mile, but not 1/2 mile.
+- 11 -- Supermarket not within a mile.
+
+
+```{r}
+fa_travis_lila <- fa_travis_lila %>% 
+  mutate(Limited_Income_Limited_Access = 
+            case_when(
+              (LILATracts_halfAnd10 == 0 & LILATracts_1And10 == 0) ~ "Good access",
+              (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 0) ~ "Between half and one mile",
+              (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 1) ~ "More than one mile"
+            )
+        )
+
+# peeks at the results for veracity
+fa_travis_lila %>%
+  select(CensusTract,
+         LILATracts_halfAnd10,
+         LILATracts_1And10,
+         Limited_Income_Limited_Access
+  ) %>% head(10)
+
+```
+
+## Create column for LA food access for tracts
+
+We are picking up the fa_travis_la dataframe from above and creating a similar Food Access column
+
+```{r}
+fa_travis_la <- fa_travis_la %>% 
+  mutate(Limited_Access = 
+            case_when(
+              (LATracts_half == 0 & LATracts1 == 0) ~ "Good access",
+              (LATracts_half == 1 & LATracts1 == 0) ~ "Between half and one mile",
+              (LATracts_half == 1 & LATracts1 == 1) ~ "More than one mile"
+            )
+        )
+
+# peeking to check
+# we need 20 to check all three versions
+fa_travis_la %>% 
+  select(CensusTract, LATracts_half, LATracts1, Limited_Access) %>% 
+  head(20)
+
+```
+
+## Join LA to LILA
+
+We'll create a new dataframe that starts with LILA and adds the `Limited Access` column from the LA dataframe.
+
+```{r}
+# Drop unneeded columns from la
+fa_travis_la <- fa_travis_la %>% 
+  select(CensusTract, LATracts_half, LATracts1)
+
+# join the dataframes
+travis_food_access <- left_join(fa_travis_lila, fa_travis_la, by="CensusTract")
+
+```
+
+## Export for QGIS
+
+My easy out is to export this as csv and then join in QGIS.
+
+I'll also export as .rds to try to build maps in R later.
+
+```{r}
+travis_food_access %>% write_rds("data-processed/travis_food_access.rds")
+travis_food_access %>% write_csv("data-processed/travis_food_access.csv")
+```
+

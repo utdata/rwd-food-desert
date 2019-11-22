@@ -10,7 +10,6 @@ knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = e
 library(tidyverse)
 library(janitor)
 library(readxl)
-
 ```
 
 ## Import the data
@@ -40,24 +39,9 @@ fa_raw %>% names
 fa_travis <- fa_raw %>%
   select(c(1:6,10:13,15:24)) %>% # selects columns by position
   filter(State == "Texas", County == "Travis")
-
-# reducing columns further. removing Low Access only columns
-fa_travis_lila <- fa_travis %>% 
-  select(-starts_with("LA"))
 ```
 
 ```{r}
-fa_travis_lila %>% names()
+fa_travis %>% write_rds("data-processed/fa_travis.rds")
 ```
-
-## Plan from here
-
-- Reorder the columns to put LILA at the end?
-- Reshape LILA columns into one column
-- Change them into factors
-- Order by the factors
-- Filter to tracts that are true (i.e., find the factor that has GS furthest away)
-- Filter to remove factor values that are higher than the first furthest away value. i.e., if there is a story at 1 mile, we don't need 10 mile or 20 mile.
-- We should end up with 218 rows again ... one for each tract.
-
 
