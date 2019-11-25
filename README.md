@@ -33,7 +33,7 @@ The `qgis` folder has a project `food_access.qgz` that has Travis Census tracts 
 - That was opened and joined with `data-processed/tfa.csv`.
 - The result was exported as `travis_food_access` shapefile called `tfa.shp` (and companion files). A compressed zip is also available.
 
-In the `tableau` folder is a workbook `FoodDesert.twb` that imports the `tfa.shp` file as a Spatial file and then creates the two interactive maps.
+In the `tableau` folder is a workbook `FoodDesert.twb` that imports the `tfa.shp` file as a Spatial file and then creates the two interactive maps. I didn't finish or publish that because it is the answer to a class assignment for a couple of students.
 
 [This Tableau help file](https://help.tableau.com/current/pro/desktop/en-us/maps_shapefiles.htm) was useful in dealing with the shapefiles. Of importance: add the Geoid to detial to split the individual tracts.
 
@@ -41,8 +41,11 @@ In the `tableau` folder is a workbook `FoodDesert.twb` that imports the `tfa.shp
 
 The folder [csvkit](csvkit) has some earlier work to convert the Excel file to csv. It's moot at this point, but I'm keeping it as a learning experience.
 
-## Workbench
+## Workbench & Google Sheets
 
-After all this, I'm not sure I need R. It may be possible to create the food access columns with a complicated IF Excel formula. I would still need QGIS to join that data to the shapefile, unless there is a way to do that in Tableau that I could not find.
+I started working on this project in R because I thought I would have to do a complicated reshape and filter to build the food access columns for "Limited Access" and "Limited Income Limited Access", but once I figured out the logic of the columns I found I only needed two of them for our county, so a nested IF would suffice.
 
+I tried later to go back to [Workbench](https://app.workbenchdata.com/workflows/40486/) (the platform where I started this project) to do the IF, but I found their Excel formulas do not support the `AND` function, at least not within and `IF`.
+
+I was able to build the columns in a Google sheet [Food access formula](https://docs.google.com/spreadsheets/d/13QZmczHLAL3_DIIQ6h7Tjgzty-GSPh1OtAr94K7wiUQ/edit#gid=259790322). That file was started from the end of the "Import" sheet in the Workbench workbook. It wasn't used ... I just wanted to figure out the formula.
 
