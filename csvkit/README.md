@@ -1,6 +1,6 @@
 # Food desert data
 
-> This work was done before I moved to doing this in R. Some of the paths may be incorrect now.
+> This work was done before I moved to R. Some of the paths may be incorrect now.
 
 Some work to help some students on a project. We are using a python-based package called [csvkit](https://csvkit.readthedocs.io/en/latest/) to manage a large Excel file without having Excel.
 
@@ -36,7 +36,7 @@ The creates an env called **data**. You only have to do this once on your comput
 - Create two folders inside called **data-raw** and **csvkit**. This is so we won't overwrite the original data. Just good practice.
 - Put your downloaded Excel file into the **data-raw** folder.
 
-The rest of this is done from inside a Terminal. (There is some benefit in using VS Code and it's integrated Terminal so you can see the files created and inspect them.
+The rest of this is done from inside a Terminal. (There is some benefit in using VS Code and it's integrated Terminal so you can see the files created and inspect them.)
 
 - In your Terminal, `cd` into you project folder, then to inside the **csvkit** folder.
 - Do `conda activate data` to launch the python env.
