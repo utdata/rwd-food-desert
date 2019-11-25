@@ -15,14 +15,15 @@ knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = e
 - Create a new `Limited_Income_Limited_Access` column based on our logic noted below.
 - We do a similar function for the LA dataset to get `Limited_Access`.
 - We create our final dataset by joining the new `Limited_Access` column to the LILA dataset.
-- Once this is all done, we could export to join with the shapefile in QGIS
-- Some day I'll try to do the maps in R.
+- Once this is all done, we could export to join with the shapefile in QGIS.
+- I also mapped the results in R in the next workbook.
 
 ## Libraries
 
 ```{r setup, echo=T, results='hide', message=F, warning=F}
 library(tidyverse)
 library(janitor)
+library(forcats)
 ```
 
 
@@ -121,16 +122,20 @@ fa_travis_lila <- fa_travis_lila %>%
 
 How to rate the tracts. Remember we already checked the 10+, 20+ for rural tracts.
 
-- 00 -- Not a LILA food desert.
-- 10 -- Supermarket w/in 1 mile, but not 1/2 mile.
-- 11 -- Supermarket not within 1 mile.
+- 00 -- Not a food desert. THIS SEEMS OFF. ESPECIALLY WITH LILA.
+- 10 -- Supermarket more than 1/2 mile away (but within a mile?)
+- 11 -- Supermarket more than 1 mile away.
+
+Low-income census tracts where a significant number or share of residents is more than 1/2 mile (urban) or 10 miles (rural) from the nearest supermarket.
+
+Low-income census tracts where a significant number or share of residents is more than 1 mile (urban) or 10 miles (rural) from the nearest supermarket.
 
 
 ```{r}
 fa_travis_lila <- fa_travis_lila %>% 
   mutate(Limited_Income_Limited_Access = 
             case_when(
-              (LILATracts_halfAnd10 == 0 & LILATracts_1And10 == 0) ~ "Good access",
+              (LILATracts_halfAnd10 == 0 & LILATracts_1And10 == 0) ~ "Good access or rural",
               (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 0) ~ "Between 1/2 and 1 mile",
               (LILATracts_halfAnd10 == 1 & LILATracts_1And10 == 1) ~ "More than 1 mile"
             )
@@ -155,7 +160,7 @@ We are picking up the fa_travis_la dataframe from above and creating a similar F
 fa_travis_la <- fa_travis_la %>% 
   mutate(Limited_Access = 
             case_when(
-              (LATracts_half == 0 & LATracts1 == 0) ~ "Good access",
+              (LATracts_half == 0 & LATracts1 == 0) ~ "Good access or rural",
               (LATracts_half == 1 & LATracts1 == 0) ~ "Between 1/2 and 1 mile",
               (LATracts_half == 1 & LATracts1 == 1) ~ "More than 1 mile"
             )
@@ -168,6 +173,13 @@ fa_travis_la %>%
   head(20)
 
 ```
+
+
+
+
+
+
+
 
 ## Join LA to LILA
 
@@ -184,6 +196,34 @@ tfa <- left_join(fa_travis_lila, fa_travis_la, by="CensusTract")
 # peek at names to check join
 tfa %>% names()
 
+```
+
+
+### Set the food access columns as factors
+
+This sets these columns as factors and sets the level from best access to worst. This will be useful later with mapping in R.
+
+```{r}
+tfa <- tfa %>% 
+  mutate(
+    Limited_Income_Limited_Access = Limited_Income_Limited_Access %>%
+      as_factor() %>% 
+      fct_relevel(
+        "Good access or rural",
+        "Between 1/2 and 1 mile",
+        "More than 1 mile"
+        ),
+    Limited_Access = Limited_Access %>%
+      as_factor() %>% 
+      fct_relevel(
+        "Good access or rural",
+        "Between 1/2 and 1 mile",
+        "More than 1 mile"
+        )
+    )
+
+## Peek at the levels
+tfa$Limited_Access %>% levels()
 ```
 
 ## Export for QGIS
@@ -235,9 +275,9 @@ tfa <- tfa %>%
 
 ### Do the exports
 
-My easy out is to export this as csv and then join in QGIS.
+Exports to csv to then join in QGIS.
 
-I'll also export as .rds to try to build maps in R later.
+Also exports as .rds to build maps in R.
 
 ```{r}
 tfa %>% write_rds("data-processed/tfa.rds")

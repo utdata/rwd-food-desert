@@ -1,0 +1,95 @@
+---
+title: "Mapping food access data"
+output:
+  html_document:
+    df_print: paged
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_dir = "docs") })
+---
+
+The idea is to use Kyle Walker's [tigris](https://github.com/walkerke/tigris) package to make a map of the food access data.
+
+```{r setup, echo=T, results='hide', message=F, warning=F}
+library(tidyverse)
+library(censusapi)
+library(tigris)
+library(janitor)
+```
+
+## Get the shapefle from tigris
+
+```{r}
+options(tigris_use_cache = TRUE)
+options(tigris_class = "sf")
+travis_shp <-  tracts("TX", county = "Travis")
+```
+
+## Import the food access data
+
+```{r}
+travis_fa <- read_rds("data-processed/tfa.rds")
+```
+
+## Join the data
+
+```{r}
+# create new fram of joined data
+travis_fa_map <- left_join(travis_shp, travis_fa, by=c("GEOID" = "CensusTract"))
+```
+
+## Visualize Median Family Income from data
+
+I did this first to remember how to map.
+
+```{r}
+ggplot(travis_fa_map) + 
+  geom_sf(aes(fill=MedianFamilyIncome), color="white") +
+  theme_void() +
+  theme(panel.grid.major = element_line(colour = 'transparent')) +
+  scale_fill_distiller(palette="Oranges", direction=1, name="Median Family Income") +
+  labs(title="Median Family Income (2010) Travis County by Tract", caption="Source: USDA")
+```
+
+### Limited Access tracts
+
+
+```{r}
+ggplot(travis_fa_map) + 
+  geom_sf(aes(fill = Limited_Access), color="white") +
+  scale_fill_manual(values=c("grey90", "tan1", "tomato")) +
+  theme_void() +
+  theme(panel.grid.major = element_line(colour = 'transparent')) +
+  labs(
+    title="Limited Food Access in Travis County",
+    subtitle = "Tracts where a significant number or share of residents lack access to a supermarket\nwithin a certain distance.",
+    caption="Source: USDA", fill = "Food access")
+
+```
+
+### Limited income and Limited Access
+
+```{r}
+ggplot(travis_fa_map) + 
+  geom_sf(aes(fill = Limited_Income_Limited_Access), color="white") +
+  scale_fill_manual(values=c("grey90", "tan1", "tomato")) +
+  theme_void() +
+  theme(panel.grid.major = element_line(colour = 'transparent')) +
+  labs(
+    title="Limited Income and Limited Food Access in Travis County",
+    subtitle = "Tracts where a significant number or share of residents are low income and lack acces\nto a supermarket within a certain distance.",
+    caption="Source: USDA", fill = "Food access")
+
+```
+
+## Where are the Urban vs Rural tracts?
+
+```{r}
+ggplot(travis_fa_map) + 
+  geom_sf(aes(fill = Urban), color="white") +
+  # scale_fill_manual(values=c("grey90", "tan1", "tomato")) +
+  theme_void() +
+  theme(panel.grid.major = element_line(colour = 'transparent')) +
+  labs(title = "Tracts considered Urban")
+
+```
+
+
