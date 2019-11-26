@@ -12,7 +12,7 @@ This prepares Food Access data to join with spatial files to put in Tableau. We'
 ![food-atlas](img/food-atlas-map.png)
 
 
-## Getting the data
+## Getting the datax
 
 The data file _Food Access Research Atlas Data Download 2015_ was downloaded from [United States Department of Agriculture](https://www.ers.usda.gov/data-products/food-access-research-atlas/download-the-data/). It is saved as `data-raw/DataDownload2015.xlsx`. This has three tabs. I saved the tab **Variables Lookup** as it's own file `data-dictionary.xlsx` for reference in a smaller file. There is  [documentation](https://www.ers.usda.gov/data-products/food-access-research-atlas/documentation/) for the food access varialbles.
 

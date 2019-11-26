@@ -23,7 +23,7 @@ fa_raw <- read_excel("data-raw/DataDownload2015.xlsx", sheet = "Food Access Rese
 Look at names so we can select them:
 
 ```{r}
-fa_raw %>% names
+fa_raw %>% names()
 ```
 
 ### Select and filter data

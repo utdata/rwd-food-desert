@@ -61,7 +61,7 @@ ggplot(travis_fa_map) +
   labs(
     title="Limited Food Access in Travis County",
     subtitle = "Tracts where a significant number or share of residents lack access to a supermarket\nwithin a certain distance.",
-    caption="Source: USDA", fill = "Food access")
+    caption="By: Christian McDonald; Source: USDA, 2015 data", fill = "Food access")
 
 ```
 
@@ -75,8 +75,8 @@ ggplot(travis_fa_map) +
   theme(panel.grid.major = element_line(colour = 'transparent')) +
   labs(
     title="Limited Income and Limited Food Access in Travis County",
-    subtitle = "Tracts where a significant number or share of residents are low income and lack acces\nto a supermarket within a certain distance.",
-    caption="Source: USDA", fill = "Food access")
+    subtitle = "Tracts where a significant number or share of residents are low income and lack access\nto a supermarket within a certain distance.",
+    caption="By: Christian McDonald; Source: USDA, 2015 data", fill = "Access to supermarket")
 
 ```
 
